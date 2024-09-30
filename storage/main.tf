@@ -2,11 +2,7 @@
 
 resource "aws_s3_bucket" "main" {
   bucket = var.domain_name
-
-  tags = {
-    Project = var.project_name
-  }
-  #local-exec on-destroy empty bucket script
+  tags   = var.tags
 }
 
 resource "aws_s3_bucket_public_access_block" "main_public_access" {
@@ -14,10 +10,10 @@ resource "aws_s3_bucket_public_access_block" "main_public_access" {
   block_public_acls       = true
   ignore_public_acls      = true
   block_public_policy     = false
-  restrict_public_buckets = false 
+  restrict_public_buckets = false
 }
 
-resource "aws_s3_bucket_policy" "access" {
+resource "aws_s3_bucket_policy" "public_get_access" {
   bucket = aws_s3_bucket.main.id
   policy = jsonencode(
     {
@@ -36,7 +32,7 @@ resource "aws_s3_bucket_policy" "access" {
   depends_on = [aws_s3_bucket_public_access_block.main_public_access]
 }
 
-resource "aws_s3_bucket_website_configuration" "hosting" {
+resource "aws_s3_bucket_website_configuration" "main" {
   bucket = aws_s3_bucket.main.id
 
   index_document {

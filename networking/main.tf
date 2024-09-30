@@ -4,20 +4,18 @@ data "aws_route53_zone" "selected" {
   name = var.domain_name
 }
 
-resource "aws_acm_certificate" "cert" {
+resource "aws_acm_certificate" "main" {
   domain_name       = data.aws_route53_zone.selected.name
   validation_method = "DNS"
   lifecycle {
     create_before_destroy = true
   }
-  tags = {
-    Project = var.project_name
-  }
+  tags = var.tags
 }
 
 resource "aws_route53_record" "validation" {
   for_each = {
-    for dvo in aws_acm_certificate.cert.domain_validation_options : dvo.domain_name => {
+    for dvo in aws_acm_certificate.main.domain_validation_options : dvo.domain_name => {
       name   = dvo.resource_record_name
       record = dvo.resource_record_value
       type   = dvo.resource_record_type
@@ -32,7 +30,7 @@ resource "aws_route53_record" "validation" {
   zone_id         = data.aws_route53_zone.selected.zone_id
 }
 
-resource "aws_cloudfront_distribution" "distribution" {
+resource "aws_cloudfront_distribution" "main" {
   is_ipv6_enabled = true
   enabled         = true
   origin {
@@ -53,7 +51,7 @@ resource "aws_cloudfront_distribution" "distribution" {
   default_root_object = var.default_root_object
 
   viewer_certificate {
-    acm_certificate_arn = aws_acm_certificate.cert.arn
+    acm_certificate_arn = aws_acm_certificate.main.arn
     ssl_support_method  = "sni-only"
   }
 
@@ -64,9 +62,7 @@ resource "aws_cloudfront_distribution" "distribution" {
     }
   }
 
-  tags = {
-    Project = var.project_name
-  }
+  tags = var.tags
 }
 
 resource "aws_route53_record" "alias" {
@@ -75,8 +71,8 @@ resource "aws_route53_record" "alias" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.distribution.domain_name
-    zone_id                = aws_cloudfront_distribution.distribution.hosted_zone_id
+    name                   = aws_cloudfront_distribution.main.domain_name
+    zone_id                = aws_cloudfront_distribution.main.hosted_zone_id
     evaluate_target_health = true
   }
 }
