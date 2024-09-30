@@ -10,8 +10,8 @@
 
 ### Terraform 
 ```hcl
-module "website" {
-  source = "github.com/gspider8/terraform-aws-s3-website-ext-dns//s3-website-ext-dns?ref=v0.0.1"
+module "s3_website" {
+  source = "github.com/gspider8/terraform-aws-s3-website-ext-dns?ref=v0.0.3"
   domain_name = "example.com"
   tags = {
     project = "example-s3-website"
