@@ -9,5 +9,5 @@ output "cloudfront_distribution" {
 }
 
 output "hosted_zone" {
-  value = data.aws_route53_zone
+  value = data.aws_route53_zone.main
 }

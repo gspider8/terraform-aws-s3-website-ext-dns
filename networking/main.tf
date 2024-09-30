@@ -1,11 +1,11 @@
 # --- s3-website-ext-dns.networking.main ---
 
-data "aws_route53_zone" "selected" {
+data "aws_route53_zone" "main" {
   name = var.domain_name
 }
 
 resource "aws_acm_certificate" "main" {
-  domain_name       = data.aws_route53_zone.selected.name
+  domain_name       = data.aws_route53_zone.main.name
   validation_method = "DNS"
   lifecycle {
     create_before_destroy = true
@@ -27,7 +27,7 @@ resource "aws_route53_record" "validation" {
   records         = [each.value.record]
   ttl             = 60
   type            = each.value.type
-  zone_id         = data.aws_route53_zone.selected.zone_id
+  zone_id         = data.aws_route53_zone.main.zone_id
 }
 
 resource "aws_cloudfront_distribution" "main" {
@@ -66,7 +66,7 @@ resource "aws_cloudfront_distribution" "main" {
 }
 
 resource "aws_route53_record" "alias" {
-  zone_id = data.aws_route53_zone.selected.zone_id
+  zone_id = data.aws_route53_zone.main.zone_id
   name    = var.domain_name
   type    = "A"
 
